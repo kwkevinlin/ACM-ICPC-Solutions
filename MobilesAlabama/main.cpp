@@ -20,8 +20,17 @@ int main () {
 		inputStack.push(in);
 	}
 
+	char n; //More efficient, or negligible?
 	while (inputStack.size() != 0) {
-
+		n = inputStack.top();
+		if (n == '(') {
+			//Search storageStack until ) found
+		}
+		else if (n == ')') {
+			storageStack.push(n);
+			cout << storageStack.top() << endl;
+			inputStack.pop();
+		}
 	}
 
 }
