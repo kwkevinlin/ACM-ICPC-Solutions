@@ -30,10 +30,31 @@ int main () {
 
 	string n; //More efficient, or negligible?
 	//Processing the inputStack
-	inputStack.pop(); //Pop )
-	inputStack.pop(); //Pop (
 	while (inputStack.size() != 0) {
 		n = inputStack.top();
+		if (n.length() > 1 && n.find(".") == -1) {
+			string *nArray = new string[n.length()];
+			for (int i = 0; i < n.length(); i++) {
+				nArray[i] = n[i];
+				storageVector.push_back(nArray[i]);
+				cout << "\t" <<nArray[i] << endl;
+			}
+			delete [] nArray;
+		} else {
+			cout << n << endl;
+			storageVector.push_back(n);
+		}
+		inputStack.pop();
+	}
+
+	for (int i = 0; i < storageVector.size(); i++) {
+		cout << storageVector[i] << " ";
+	}
+
+
+
+
+/*
 		if (n == "(") {
 			//Search storageStack until ) found
 		}
@@ -47,6 +68,6 @@ int main () {
 			cout << "To Storage: " << storageVector.back() << endl;
 			inputStack.pop();
 		}
-	}
+		*/
 
 }
