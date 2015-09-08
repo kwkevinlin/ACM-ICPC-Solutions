@@ -5,8 +5,8 @@
 #include <stack>
 #include <vector>
 
-#include "bar.h"
-#include "decoration.h"
+//#include "bar.h"
+//#include "decoration.h"
 
 using namespace std;
 
@@ -23,12 +23,33 @@ int main () {
 	ifstream input("input.txt");
 	string in; string temp;
 	while (input >> in) {
-		inputStack.push(in);
-		cout << inputStack.top() << endl;
+		if (in.length() > 1 && in.find(".") == -1) {
+			for (int i = 0; i < in.length(); i++) {
+				cout << in[i] << " ";
+				inputStack.push(string(1, in[i]));
+			}
+		} else {
+			cout << in << " ";
+			inputStack.push(in);
+		}
 	}
-	cout << endl;
+	cout << endl << endl;
+/*
+	cout << "inputStack.size() = " << inputStack.size() << endl;
+	for (int i = 0; i < inputStack.size(); i++) {
+		cout << i << "  " << inputStack.top() << endl;
+		inputStack.pop();
+	}
+*/
+	while (!inputStack.empty()) {
+		cout << inputStack.top() << endl;
+		inputStack.pop();
+	}
 
-	string n; //More efficient, or negligible?
+	cout << "End of Loop" << inputStack.empty() << endl;
+
+	/*
+	string n;
 	//Processing the inputStack
 	while (inputStack.size() != 0) {
 		n = inputStack.top();
@@ -50,6 +71,7 @@ int main () {
 	for (int i = 0; i < storageVector.size(); i++) {
 		cout << storageVector[i] << " ";
 	}
+	*/
 
 
 
