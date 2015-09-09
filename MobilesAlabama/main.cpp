@@ -5,8 +5,8 @@
 #include <stack>
 #include <vector>
 
-//#include "bar.h"
-//#include "decoration.h"
+#include "bar.h"
+#include "decoration.h"
 
 using namespace std;
 
@@ -41,14 +41,31 @@ int main () {
 	}
 	cout << "End of Loop" << endl << endl;
 */
+	float dWeight;
 	while (!inputStack.empty()) {
 		in = inputStack.top();
-		if (in == "(") {
-			//Closed, so go before until ")"
-			//Don't forget to pop
+		//At start, put everything to storageStack
+		storageStack.push(in);
 
-		} else {
-			storageStack.push(in);
+		if (in == "(") {
+			//Default runs this
+			if (storageStack.top() != ")") {//If not ). Ignore, since if ( ), then its end of input
+				storageStack.pop(); //Pop off "("
+				if (storageStack.top() == "D") {
+					//Read next
+					storageStack.pop(); //Pop off D to access weight
+					decoration dec1(stof(storageStack.top()));
+					cout << endl << stof(storageStack.top()) << endl << endl;
+
+				}
+				else if (storageStack.top() == "B") {
+					cout << endl;
+				}
+			} else {
+				//It only goes here if at beginning, reading: ()
+				storageStack.pop();
+				storageStack.pop();
+			}
 		}
 	}
 

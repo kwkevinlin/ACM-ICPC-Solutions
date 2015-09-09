@@ -12,10 +12,15 @@ class decoration {
 
 public:
 
-	decoration(int ID, float wt) {
-		barID = ID;
+	decoration(float wt) {
+		barID = -1;
 		weight = wt;
 	}
+
+	void setID(int id) {
+		barID = id;
+	}
+
 	float getWeight() {
 		return weight;
 	}

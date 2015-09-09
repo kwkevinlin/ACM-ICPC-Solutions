@@ -12,10 +12,15 @@ class bar {
 
 public:
 
-	bar(int ID, float ln) {
-		barID = ID;
+	bar(float ln) {
+		barID = -1;
 		length = ln;
 	}
+
+	void setID(int id) {
+		barID = id;
+	}
+
 	float getLength() {
 		return length;
 	}
