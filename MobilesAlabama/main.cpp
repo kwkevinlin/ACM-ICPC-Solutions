@@ -42,31 +42,63 @@ int main () {
 	cout << "End of Loop" << endl << endl;
 */
 	float dWeight;
+	int tempID, length1, length2;
+	vector<decoration> dec;
+	vector<bar> bars; //Capitalized
 	while (!inputStack.empty()) {
 		in = inputStack.top();
 		//At start, put everything to storageStack
+		cout << "Reading in: " << in << endl;
 		storageStack.push(in);
 
 		if (in == "(") {
+			storageStack.pop(); //Pop off "("
 			//Default runs this
 			if (storageStack.top() != ")") {//If not ). Ignore, since if ( ), then its end of input
-				storageStack.pop(); //Pop off "("
+				cout << "Inside with " << storageStack.top() << endl;
 				if (storageStack.top() == "D") {
 					//Read next
 					storageStack.pop(); //Pop off D to access weight
-					decoration dec1(stof(storageStack.top()));
-					cout << endl << stof(storageStack.top()) << endl << endl;
-
+					dec.push_back(decoration(stof(storageStack.top()))); //Creates temporary
+					//cout << "Vector: " << dec[0].getWeight() << endl;
+					storageStack.pop(); //Pop off 2.0
+					storageStack.pop(); //Pop off )
 				}
 				else if (storageStack.top() == "B") {
-					cout << endl;
-				}
+					storageStack.pop(); //Pop off B
+					tempID = stoi(storageStack.top());
+					storageStack.pop(); //Pop off bar ID
+					bars.push_back(bar(tempID, stof(storageStack.top())));
+					storageStack.pop(); //Pop off weight
+					//cout << "Size check: " << storageStack.size() << " " << storageStack.top() << endl;
+					//storageStack.pop(); //Pop off )
+					//cout << "Size check: " << storageStack.size() << endl;
+
+					if (storageStack.size() == 0) { //End of input
+						//Then start combining Bars and Decorations
+						cout << "Size = 1 here" << endl;
+					}
+					else if (storageStack.size() != 0) { //Still parsing
+						storageStack.pop(); //Pop off )
+					}
+					else
+						cout << "Something is wrong\n\n";
+
+					//Once reach bar, then means decorations are ready, so can start calculating
+					cout << "\nNumber of bars: " << bars.size() << endl << endl;
+					//0 = L1*W1 - L2*W2
+					cout << dec[0].getWeight() << " " << dec[1].getWeight() << endl;
+					//length1 =
+
+					//then erase [1] and store data to [0]. so everytime, dec<vector> will only have 2 items
+
+;				}
 			} else {
 				//It only goes here if at beginning, reading: ()
-				storageStack.pop();
-				storageStack.pop();
+				storageStack.pop(); //Pop off ")"
 			}
 		}
+		inputStack.pop();
 	}
 
 	/*
