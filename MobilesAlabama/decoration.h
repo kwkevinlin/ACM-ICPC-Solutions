@@ -13,23 +13,14 @@ class decoration {
 public:
 
 	decoration(float wt) {
-		barID = -1;
 		weight = wt;
-	}
-
-	void setID(int id) {
-		barID = id;
 	}
 
 	float getWeight() {
 		return weight;
 	}
-	int getBarID() {
-		return barID;
-	}
 
 private:
-	int barID;
 	float weight;
 
 };

@@ -26,7 +26,7 @@ public:
 
 private:
 	int barID;
-	float length;
+	float length; //Total length of bar
 
 };
 
