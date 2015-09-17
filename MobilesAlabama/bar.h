@@ -1,8 +1,6 @@
 /*
- * bar.h
- *
  *  Created on: Sep 3, 2015
- *      Author: kevin
+ *      Author: Kevin Lin
  */
 
 #ifndef BAR_H_

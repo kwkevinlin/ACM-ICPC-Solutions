@@ -1,8 +1,6 @@
 /*
- * decoration.h
- *
  *  Created on: Sep 3, 2015
- *      Author: kevin
+ *      Author: Kevin Lin
  */
 
 #ifndef DECORATION_H_
