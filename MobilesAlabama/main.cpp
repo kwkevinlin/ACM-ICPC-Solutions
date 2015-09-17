@@ -1,10 +1,15 @@
+/*
+ * Author: Kevin Lin
+ * ACM-ICPC 2007 Mid-Atlantic Regionals
+ * Problem B - Mobiles Alabama
+ */
+
 #include <iostream>
 #include <stdio.h>
 #include <fstream>
 #include <string>
 #include <stack>
 #include <vector>
-#include <sstream>
 #include <iomanip>
 
 #include "bar.h"
@@ -23,27 +28,34 @@ int main () {
 	 * If it is:
 	 * 		"D" : We pop "D", then use the value on storageStack.top() which is the weight of the decoration,
 	 * 			  and create a new decoration class object and push that onto dec<vector>. It will be used when
-	 * 			  we process "B". Dec<vector> should only always have 2 elements, so kind of stupid to use a
-	 * 			  vector I guess. :(
+	 * 			  we process "B". Dec<vector> contains all of the weights that will be used for calculation. The
+	 * 			  last two will always be the ones used for calculations.
 	 * 		"B" : This is where we really get the solution to the question. We pop "B", then using the next two
 	 * 			  elements on the top of the stack (bar ID and length), we create a bar class object and put that
-	 * 			  onto another vector. Again, a vector doesn't need to be used here because we're only processing
-	 * 			  one at a time. It would probably be more efficient to use a single object, and delete/or modify
-	 * 			  it every time we're done with it.
+	 * 			  onto another vector, bars<vector>. A vector doesn't necessarily need to be used here because
+	 * 			  we're only processing one bar at a time, and we won't need previous bars for future calculations
+	 * 			  (only the weight of the bar will be needed, which is stored in dec<vector>. It would probably be
+	 * 			  more efficient to just use a single bar object, and delete/or modify the instance everytime we
+	 * 			  need to.
 	 *
 	 * 			  How the Math was Done:
-	 * 			  Every time I am processing "B", there should only be two elements inside the decorations<vector>.
-	 * 			  We use those two decoration weights, and solve our equation.
-	 * 			  		L1 + L2 = X, where X is given (ex: 2)
+	 * 			  Every time "B" is being processed, we will take the specifications of the weights from the top
+	 * 			  of the dec<vector>, so dec[dec.size() - 1].getWeight(), and also for dec.size() - 2.
+	 * 			  As we know,
+	 * 			  		L1 + L2 = X, where X is the length of the bar, and is given (ex: 2)
+	 * 			  We also know from the worksheet that,
 	 * 			  		L1W1 = L2W2
-	 * 			  So let's take L1, and try to substitute that into the first equation. In equation 2,
+	 * 			  So let's take L1, and try to substitute that into the first equation. Trying to separate L1,
 	 * 			  		L1 = ( L2W2 ) / W1
-	 * 			  		L1 = Tweight * L2, where Tweight = W2 / W1
-	 * 			  Then, using the new value of L1,
+	 * 			  Let Tweight = W2 / W1, since
+	 * 			  		L1 = L2 * (W2/W1)
+	 *			  Thus,
+	 * 			  		L1 = L2 * Tweight
+	 * 			  Using the new value of L1,
 	 * 			  		L1 + L2 = 2
-	 * 			  Substitute in:
+	 * 			  Substitute in from above (L1 = L2 * Tweight),
 	 * 			  		Tweight * L2 + L2 = 2
-	 * 			  If Tweight = 3
+	 * 			  If Tweight = 3, then:
 	 * 			  		3 * L2 + L2 = 2
 	 * 			  		4L2 = 2
 	 * 			  		L2 = 1/2
@@ -51,23 +63,27 @@ int main () {
 	 * 			  		L1 + L2 = 2
 	 * 			  		L1 + 1/2 = 2
 	 * 			  		L1 = 3/2
-	 * 			  So we output the value of L2 since it is the smaller of the two:
+	 * 			  So we output the value of L2 since that is the smaller of the two:
 	 * 			  		Bar Y must be tied 0.5 from one end
+	 * 			  We use the same technique to solve for all the bars in the input, from back to front.
 	 *
-	 * 			  Once this is done, we empty decoration<vector> and replace with them new values so that the next
-	 * 			  bar, if there is one, can use it for future calculations. We can erase decorations<vector> because
-	 * 			  both [0] and [1] values (W1 and W2) have already been used.
-	 * 			  We then push_back(W1 + W2) on the vector, since that's the total weight of the bar. Now, when we
-	 * 			  read in a new "D", we push_back that onto the decoration<vector>, and the next should be a "B",
-	 * 			  so we calculate it using the exact same way, since we already had set it up.
+	 * 			  Once the bar is finished being calculated, we delete the top two elements of dec<vector> (since
+	 * 			  those were used for the calculation we just finished), and write the new combined weight of the
+	 * 			  two elements we popped onto the vector. This sets up dec<vector> so that the same algorithm can
+	 * 			  be used for the other bars, if there are any.
 	 *
 	 */
 
 	stack<string> inputStack;
 	stack<string> storageStack;
+	vector<decoration> dec;
+	vector<bar> bars; //Notice bars (vector) vs bar (class)
 
-	ifstream input("input.txt");
-	string in;
+	/*
+	 * Part 1: Parsing Input
+	 */
+	ifstream input("input.txt"); //Use "input2.txt" for more intense testing of corner cases
+	string in, concat;
 	while (input >> in) {
 		if (in.length() > 1 && in.find(".") == -1) {
 			//Reading in as string will read symbols together, ex: ((( or (B
@@ -77,25 +93,66 @@ int main () {
 				inputStack.push(string(1, in[i]));
 			}
 		} else {
-			cout << in << " ";
-			inputStack.push(in);
+			//This section splits strings if:
+			//Both float and ( or ) exists, ex: 2.0) or (3.5 (notice no space)
+			if (in.find(".") != -1 && (in.find(")") != -1 || in.find("(") != -1) ) {
+				for (int i = 0; i < in.length(); i++) {
+					//Inside these loops, if ) or (, push. Before push though,
+					//push everything before that (if it exists)
+					if (in[i] == ')') {
+						if (concat.length() > 0) {
+							cout << concat << " ";
+							inputStack.push(concat);
+							concat = "";
+						}
+						inputStack.push(string(1, in[i]));
+						cout << inputStack.top() << " ";
+					}
+					else if (in[i] == '(') {
+						if (concat.length() > 0) {
+							cout << concat << " ";
+							inputStack.push(concat);
+							concat = "";
+						}
+						inputStack.push(string(1, in[i]));
+						cout << inputStack.top() << " ";
+					}
+					else {
+						//So if we see 2.0), then store 2.0 in concat first, then
+						//when we see ), we will push both 2.0 and ) in the above if statements
+						concat = concat + string(1, in[i]);
+					}
+				}
+				//The following occurs if parenthesis () before float
+				//Ex: (2.0 , without this, 2.0 will be in concat but won't be pushed.
+				if (concat.length() != 0) {
+					inputStack.push(concat);
+					cout << inputStack.top() << " ";
+				}
+			}
+			else {
+				cout << in << " ";
+				inputStack.push(in);
+			}
 		}
 	}
 	cout << endl << endl;
+
 /*
     //If ever want to print out inputStack for debug/testing
 	while (!inputStack.empty()) {
 		cout << inputStack.top() << " ";
 		inputStack.pop();
 	}
-	cout << "End of Loop" << endl << endl;
+	cout << endl << endl;
 */
+
+	/*
+	 * Part 2: Calculating Bar Lengths
+	 */
 	float weightTempFloat, length2Total, length1, length2;
 	int tempID;
 	int barIndex = 0;
-	string eq1, eq1Num, eq1Den, eq2, eq2Temp, weightTemp1, weightTemp2;
-	vector<decoration> dec;
-	vector<bar> bars; //Notice bars (vector) vs bar (class)
 	while (!inputStack.empty()) {
 		in = inputStack.top();
 		//At start, put everything to storageStack
@@ -110,8 +167,11 @@ int main () {
 				if (storageStack.top() == "D") {
 					storageStack.pop(); //Pop off D to access weight
 					dec.push_back(decoration(stof(storageStack.top()))); //Creates temporary
+					//cout << "Top: " << storageStack.top() << endl;
 					storageStack.pop(); //Pop off 2.0
+					//cout << "Top: " << storageStack.top() << endl;
 					storageStack.pop(); //Pop off )
+
 				}
 				else if (storageStack.top() == "B") {
 					storageStack.pop(); //Pop off B
@@ -123,30 +183,16 @@ int main () {
 					//storageStack.pop(); //Pop off )
 					//cout << "Size check: " << storageStack.size() << endl;
 
-
-					/*
-					 * To Change:
-					 * Instead of deleting all from dec<vector>, delete top 2 instead
-					 */
-
-					if (storageStack.size() == 0) { //End of input
-						//Then start combining Bars and Decorations
-						//And don't pop! Something seems a bit fishy here, but not sure yet
-						//This if statement (and the "else") is purely for debugging purposes
-						//cout << "\nEnd of input" << endl;
-					}
-					else if (storageStack.size() != 0) { //Still parsing
-						storageStack.pop(); //Pop off )
-					}
-					else
-						cout << "Something is wrong\n\n";
+					storageStack.pop(); //Pop off )
 
 					//Once reach bar, then means decorations are ready, so can start calculating
 					//cout << "\nNumber of bars: " << bars.size() << endl;
 					barIndex = bars.size() - 1; //Can replace using vector since there's really no need for one
 
 					//Doing calculations
-					length2Total = 1 + dec[0].getWeight(); // L1+L2 = 2, but L1 = 2L2 so 3L2 = 2. Hardcoded 1 because L2 will always be by itself
+					//cout << "Using weights: " << dec[dec.size() - 2].getWeight() << ", " << dec[dec.size() - 1].getWeight() << endl;
+					length2Total = 1 + (dec[dec.size() - 2].getWeight()/dec[dec.size() - 1].getWeight()); // L1+L2 = 2, but L1 = 2L2 so 3L2 = 2. Hardcoded 1 because L2 will always be by itself
+					//cout << length2Total << endl;
 					length2 = bars[barIndex].getLength()/length2Total;
 					cout << "Length2 = " << length2 << endl;
 					length1 = bars[barIndex].getLength() - length2;
@@ -160,16 +206,16 @@ int main () {
 					//Now, write them back to decoration so next bar can use
 
 					//Position shouldn't matter, so erase both and push new total weight (W1 + W2) onto dec vector
-					weightTempFloat = dec[0].getWeight() + dec[1].getWeight();
-					dec.clear();
+					weightTempFloat = dec[dec.size() - 2].getWeight() + dec[dec.size() - 1].getWeight();
+					//dec.clear(); //Can't clear because don't know how nested
+					dec.pop_back();
+					dec.pop_back();
 					dec.push_back(decoration(weightTempFloat));
+
 
 					//So every time, dec<vector> will only have 2 items, setting up for future calculations
 
 				}
-			} else {
-				//It only goes here if at beginning, reading: ()
-				storageStack.pop(); //Pop off ")"
 			}
 		}
 		inputStack.pop();
