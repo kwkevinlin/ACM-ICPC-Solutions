@@ -82,7 +82,7 @@ int main () {
 	/*
 	 * Part 1: Parsing Input
 	 */
-	ifstream input("input.txt"); //Use "input2.txt" for more intense testing of corner cases
+	ifstream input("input1.txt"); //Use "input2.txt" for more intense testing of corner cases
 	string in, concat;
 	while (input >> in) {
 		if (in.length() > 1 && in.find(".") == -1) {
